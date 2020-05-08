@@ -1,0 +1,48 @@
+{
+  "project_info": {
+    "project_number": "435282189174",
+    "firebase_url": "https://facechat-3bc06.firebaseio.com",
+    "project_id": "facechat-3bc06",
+    "storage_bucket": "facechat-3bc06.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:435282189174:android:0ce98141c988e050253857",
+        "android_client_info": {
+          "package_name": "com.example.facechat"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "435282189174-qnej3rjjj0subeetsvvs7u0881eg4br3.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.facechat",
+            "certificate_hash": "7797b0b7060ea56139bea81357ecdebbc404cad9"
+          }
+        },
+        {
+          "client_id": "435282189174-l3qn2uh18vi22jhvjb34u5vm745t5j56.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDN7X7v-90eFYDiSC0cCOzPrMrnGpI-YbU"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "435282189174-l3qn2uh18vi22jhvjb34u5vm745t5j56.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
