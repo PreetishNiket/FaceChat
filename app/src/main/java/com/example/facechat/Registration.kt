@@ -4,11 +4,9 @@ import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.view.View
-import android.widget.ProgressBar
 import android.widget.Toast
 import com.google.firebase.FirebaseException
 import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.auth.PhoneAuthCredential
 import com.google.firebase.auth.PhoneAuthProvider
 import kotlinx.android.synthetic.main.activity_registration.*
@@ -96,7 +94,7 @@ class Registration : AppCompatActivity() {
         val firebaseUser=FirebaseAuth.getInstance().currentUser
         if (firebaseUser!=null)
         {
-            startActivity(Intent(this,MainActivity::class.java))
+            startActivity(Intent(this,ContactsActivity::class.java))
             finish()
         }
     }
@@ -107,7 +105,7 @@ class Registration : AppCompatActivity() {
                 {
                   // loadingBar.dismiss()
                     Toast.makeText(this,"Successful LogIn",Toast.LENGTH_SHORT).show()
-                    startActivity(Intent(this,MainActivity::class.java))
+                    startActivity(Intent(this,ContactsActivity::class.java))
                     finish()
                 }
                 else
