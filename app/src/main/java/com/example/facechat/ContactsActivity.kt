@@ -18,6 +18,9 @@ class ContactsActivity : AppCompatActivity() {
         navView.setOnNavigationItemSelectedListener(navigationItemSelectedListener)
         //7contacts_list.setHasFixedSize(true)
         contacts_list.layoutManager=LinearLayoutManager(applicationContext)
+        find_people_btn.setOnClickListener {
+            startActivity(Intent(this,FindPeopleActivity::class.java))
+        }
     }
     private val navigationItemSelectedListener
             = BottomNavigationView.OnNavigationItemSelectedListener{
