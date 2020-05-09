@@ -1,6 +1,5 @@
 package com.example.facechat
 
-import android.app.ProgressDialog
 import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
@@ -9,6 +8,7 @@ import android.widget.ProgressBar
 import android.widget.Toast
 import com.google.firebase.FirebaseException
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.auth.PhoneAuthCredential
 import com.google.firebase.auth.PhoneAuthProvider
 import kotlinx.android.synthetic.main.activity_registration.*
@@ -89,6 +89,16 @@ class Registration : AppCompatActivity() {
 
         }
 
+    }
+
+    override fun onStart() {
+        super.onStart()
+        val firebaseUser=FirebaseAuth.getInstance().currentUser
+        if (firebaseUser!=null)
+        {
+            startActivity(Intent(this,MainActivity::class.java))
+            finish()
+        }
     }
     private fun signInWithPhoneAuthCredential(credential: PhoneAuthCredential) {
         auth.signInWithCredential(credential)
