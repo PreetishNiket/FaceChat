@@ -26,7 +26,8 @@
             android:textColor="@color/colorPrimary"
             android:text="User Name"
             android:textAlignment="center"
-            android:textSize="18dp"
+            android:textSize="20dp"
+            android:textStyle="bold"
             android:layout_marginTop="5dp"
             android:layout_below="@+id/image_notification"/>
         <Button

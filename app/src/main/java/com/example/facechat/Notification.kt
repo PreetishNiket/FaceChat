@@ -16,8 +16,8 @@ class Notification : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_notification)
     }
-    class FindFriendsViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
-        fun FindFriendsViewHolder(itemView: View)
+    class NotificationViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
+        fun NotificationViewHolder(itemView: View)
         {
             val userNameTxt=itemView.findViewById<TextView>(R.id.name_notification)
             val acceptBtn=itemView.findViewById<Button>(R.id.request_accept_btn)
@@ -25,6 +25,5 @@ class Notification : AppCompatActivity() {
             val profileImageView=itemView.findViewById<ImageView>(R.id.image_notification)
             val cardView=itemView.findViewById<CardView>(R.id.card_view)
         }
-
     }
 }
