@@ -2,9 +2,12 @@ package com.example.facechat
 
 import android.app.Activity
 import android.content.Intent
+import android.graphics.BitmapFactory
+import android.graphics.drawable.BitmapDrawable
 import android.net.Uri
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.provider.MediaStore
 import android.widget.ImageView
 import android.widget.Toast
 import com.google.android.gms.tasks.Continuation
@@ -15,105 +18,130 @@ import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.database.ValueEventListener
 import com.google.firebase.storage.FirebaseStorage
+import com.google.firebase.storage.StorageReference
+import com.google.firebase.storage.StorageTask
 import com.google.firebase.storage.UploadTask
 import com.squareup.picasso.Picasso
+import com.theartofdev.edmodo.cropper.CropImage
+import com.theartofdev.edmodo.cropper.CropImageActivity
 import kotlinx.android.synthetic.main.activity_settings.*
+import java.io.IOException
 import java.util.*
 import kotlin.collections.HashMap
 
 class SettingsActivity : AppCompatActivity() {
     private val galleryPick = 100
-    private val storage by lazy {
-        FirebaseStorage.getInstance()
-            .reference
-    }
+
     private val db by lazy {
         FirebaseDatabase.getInstance()
-            .reference.child("Users")
+            .reference
     }
 
-     private var imageUri:Uri?=null
+    private val auth by lazy {
+        FirebaseAuth.getInstance()
+    }
+    var id: String? = ""
+    private var imageUri:Uri?=null
+    private var userProfileImgRef: StorageReference? = null
+    private var firebaseStore:FirebaseStorage?=null
+    //private var myUrl = ""
+
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_settings)
+        id = auth.currentUser?.uid
+        firebaseStore= FirebaseStorage.getInstance()
+        userProfileImgRef = FirebaseStorage.getInstance().reference
+           // .child("Profile Images")
+        
 
-        settings_profile_image.setOnClickListener{
-            val galleryIntent=Intent(Intent.ACTION_GET_CONTENT)
+        settings_profile_image.setOnClickListener {
+            val galleryIntent=Intent()
             galleryIntent.type="image/*"
-            startActivityForResult(galleryIntent,galleryPick)
+            galleryIntent.action=Intent.ACTION_GET_CONTENT
+            startActivityForResult(Intent.createChooser(galleryIntent,"Select Picture"),galleryPick)
+//            CropImage.activity()
+//                .setAspectRatio(1, 1)
+//                .start(this)
         }
-        //First Branch
-        val userProfileImgRef= storage.child("Profile Images")
 
         save_settings_btn.setOnClickListener {
-            val getUserName=username_settings.text.toString()
-            val getUserStatus=bio_settings.text.toString()
-            //settings_profile_image.drawable.constantState==resources.getDrawable(R.drawable.profile_image).constantState
-            when {
-                imageUri==null -> {
-                    db.addValueEventListener(object :ValueEventListener{
-                        override fun onCancelled(dataSnapshot: DatabaseError) {
-                        }
-                        override fun onDataChange(dataSnapshot: DataSnapshot) {
-                           if (dataSnapshot.child(FirebaseAuth.getInstance().currentUser!!.uid).hasChild("image"))
-                           {
-                               savInfoOnlyWithoutImage()
-                           }
-                            else{
-                               Toast.makeText(this@SettingsActivity,"Please Select Profile Photo",Toast.LENGTH_SHORT).show()
-                           }
-                        }
-
-                    })
-                }
-                getUserName == "" -> {
-                    username_settings.error="UserName Is Mandatory"
-                }
-                getUserStatus=="" -> {
-                    bio_settings.error="Bio is Mandatory"
-                }
-                else -> {
-                    val filepath=userProfileImgRef.child(FirebaseAuth.getInstance().currentUser!!.uid)
-                    val uploadTask=filepath.putFile(imageUri!!)
-
-                    uploadTask.continueWithTask(object :Continuation<UploadTask.TaskSnapshot, Task<Uri>>{
-                        override fun then(task: Task<UploadTask.TaskSnapshot>): Task<Uri> {
-                            if (!task.isSuccessful) {
-                                task.exception?.let {
-                                    throw it
-                                }
+            val getUserName = username_settings.text.toString()
+            val getUserStatus = bio_settings.text.toString()
+            if (getUserName == "")
+            {
+                username_settings.error="UserName Is Mandatory"
+            }
+            else if (getUserStatus=="")
+            {
+                bio_settings.error="Bio is Mandatory"
+            }
+            else if (imageUri!=null) {
+                    val filepath = userProfileImgRef!!.child("Profile Images/-"+id!! + ".jpg")
+                    var uploadTask: StorageTask<*>
+                    uploadTask = filepath.putFile(imageUri!!)
+                    uploadTask.continueWithTask(Continuation<UploadTask.TaskSnapshot, Task<Uri>> { task ->
+                        if (!task.isSuccessful) {
+                            task.exception?.let {
+                                throw it
                             }
-                            return filepath.downloadUrl
                         }
+                        return@Continuation filepath.downloadUrl
+                    }).addOnCompleteListener { task ->
+                        if (task.isSuccessful) {
+                            val downloadUrl = task.result.toString()
+                            val dbRef = FirebaseDatabase.getInstance().reference.child("Users")
 
-                    }).addOnCompleteListener {
-                        if (it.isSuccessful) {
-                            val downloadUrl=it.result.toString()
-                            val profileMap=HashMap<String,String>()
+                            val profileMap = HashMap<String, Any>()
                             profileMap["uid"] = FirebaseAuth.getInstance().currentUser!!.uid
                             profileMap["name"] = getUserName
-                            profileMap["status"]=getUserStatus
-                            profileMap["image"]=downloadUrl
+                            profileMap["status"] = getUserStatus
+                            profileMap["image"] = downloadUrl
 
-                            db.child(FirebaseAuth.getInstance().currentUser!!.uid).setValue(profileMap).addOnCompleteListener { task->
-                                if (task.isSuccessful) {
-                                    startActivity(Intent(this,ContactsActivity::class.java))
-                                    Toast.makeText(this,"Settings Updated",Toast.LENGTH_SHORT).show()
+                            dbRef.child(id!!).updateChildren(profileMap)
+                                .addOnCompleteListener { task ->
+                                    if (task.isSuccessful) {
+                                        startActivity(Intent(this, ContactsActivity::class.java))
+                                        Toast.makeText(this, "Settings Updated", Toast.LENGTH_SHORT)
+                                            .show()
+                                    }
                                 }
-                            }
                         }
                     }
                 }
+             else
+                {
+                    //Toast.makeText(this,"Please Upload an Image",Toast.LENGTH_SHORT).show()
+                    savInfoOnlyWithoutImage()
+                }
+
             }
-        }
         retrieveUserInfo()
-    }
+        }
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
-        if (requestCode==galleryPick &&requestCode== Activity.RESULT_OK&&data!=null)
+        if (requestCode==galleryPick &&requestCode== Activity.RESULT_OK)
         {
+            //&&data!=null
+           // CropImage.CROP_IMAGE_ACTIVITY_REQUEST_CODE
+//            val result=CropImage.getActivityResult(data)
+//            imageUri=result.uri
+//            settings_profile_image.setImageURI(imageUri)
+            if (data==null||data.data==null)
+            {
+                return
+            }
             imageUri=data.data
-            settings_profile_image.setImageURI(imageUri)
+            try {
+                val bitmap=MediaStore.Images.Media.getBitmap(contentResolver,imageUri)
+                settings_profile_image.setImageBitmap(bitmap)
+
+            }
+            catch (e:IOException)
+            {
+                e.printStackTrace()
+            }
         }
     }
     private fun savInfoOnlyWithoutImage() {
@@ -129,11 +157,12 @@ class SettingsActivity : AppCompatActivity() {
         }
         else{
             //Progress Dialog video6 26:30
-            val profileMap=HashMap<String,String>()
-            profileMap["uid"] = FirebaseAuth.getInstance().currentUser!!.uid
+            val profileMap=HashMap<String,Any>()
+            profileMap["uid"] = id!!
             profileMap["name"] = getUserName
             profileMap["status"]=getUserStatus
-            db.child(FirebaseAuth.getInstance().currentUser!!.uid).setValue(profileMap).addOnCompleteListener { task->
+            db.child("Users")
+                .child(id!!).setValue(profileMap).addOnCompleteListener { task->
                 if (task.isSuccessful) {
                     startActivity(Intent(this,ContactsActivity::class.java))
                     Toast.makeText(this,"Settings Updated",Toast.LENGTH_SHORT).show()
@@ -142,7 +171,8 @@ class SettingsActivity : AppCompatActivity() {
         }
     }
     private fun retrieveUserInfo(){
-        db.child(FirebaseAuth.getInstance().currentUser!!.uid).addValueEventListener(object :ValueEventListener{
+        db.child("Users")
+            .child(id!!).addValueEventListener(object :ValueEventListener{
             override fun onCancelled(p0: DatabaseError) {
             }
             override fun onDataChange(dataSnapshot: DataSnapshot) {
