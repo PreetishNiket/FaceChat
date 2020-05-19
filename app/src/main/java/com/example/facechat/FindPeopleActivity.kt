@@ -12,15 +12,12 @@ import android.widget.Button
 import android.widget.ImageView
 import android.widget.TextView
 import android.widget.Toast
-import androidx.cardview.widget.CardView
-import androidx.core.widget.addTextChangedListener
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.example.facechat.Class.Contacts
 import com.firebase.ui.database.FirebaseRecyclerAdapter
 import com.firebase.ui.database.FirebaseRecyclerOptions
-import com.google.android.material.snackbar.Snackbar
 import com.google.firebase.database.FirebaseDatabase
-import com.squareup.picasso.Picasso
 import kotlinx.android.synthetic.main.activity_find_people.*
 
 class FindPeopleActivity : AppCompatActivity() {
@@ -60,13 +57,14 @@ class FindPeopleActivity : AppCompatActivity() {
         if (str=="")
         {
            options=FirebaseRecyclerOptions.Builder<Contacts>()
-               .setQuery(db,Contacts::class.java)
+               .setQuery(db, Contacts::class.java)
                .build()
         }
         else
         {
              options=FirebaseRecyclerOptions.Builder<Contacts>()
-                .setQuery(db.orderByChild("name").startAt(str).endAt(str+"\uf8ff"),Contacts::class.java)
+                .setQuery(db.orderByChild("name").startAt(str).endAt(str+"\uf8ff"),
+                    Contacts::class.java)
                 .build()
         }
 

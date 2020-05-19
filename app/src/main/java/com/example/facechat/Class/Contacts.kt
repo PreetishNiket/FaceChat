@@ -1,4 +1,4 @@
-package com.example.facechat
+package com.example.facechat.Class
 
 class Contacts {
 
